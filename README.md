@@ -1,7 +1,0 @@
-# Auffline-WebUI
-Senior Design 397 web UI for Auffline - frontend interface for music playback & control 
-
-## Tech Stack 
-
-## Getting Started 
-Intructions will be added as deployment begins. 
