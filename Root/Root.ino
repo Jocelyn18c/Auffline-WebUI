@@ -3,6 +3,7 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_ILI9341.h>
 
+//test joy
 // ---- TFT pins (keep your wiring) ----
 #define TFT_CS   5
 #define TFT_DC   22
