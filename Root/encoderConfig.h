@@ -16,10 +16,10 @@ constexpr uint8_t PIN_ENC_A  = 32;
 constexpr uint8_t PIN_ENC_B  = 33;
 constexpr uint8_t PIN_ENC_SW = 25;
 
-constexpr uint8_t PIN_BTN_UP    = 26;
-constexpr uint8_t PIN_BTN_DOWN  = 27;
-constexpr uint8_t PIN_BTN_BACK  = 14;
-constexpr uint8_t PIN_BTN_MODE  = 12; // optional -> you choose mapping
+constexpr uint8_t PIN_BTN_UP    = 19;//
+constexpr uint8_t PIN_BTN_DOWN  = 4;//
+constexpr uint8_t PIN_BTN_BACK  = 16;
+constexpr uint8_t PIN_BTN_MODE  = 21; // optional -> you choose mapping
 
 // ===== Debounce =====
 struct ButtonDebounce {

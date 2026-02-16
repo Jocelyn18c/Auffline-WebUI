@@ -11,6 +11,8 @@ inline const char* const menuItems[] = {
 
 inline const int menuCount = sizeof(menuItems) / sizeof(menuItems[0]);
 
+
+//main calling function
 inline void drawMenuScreen(int selectedIndex) {
   tft.fillScreen(COLOR_BG);
   drawHeader();

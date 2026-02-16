@@ -95,7 +95,7 @@ static void handleNavEvent(NavEvent e) {
 void setup() {
   SPI.begin(TFT_SCK, -1, TFT_MOSI, TFT_CS);
   tft.begin();
-  tft.setRotation(1);
+  tft.setRotation(3);
 
   navBegin();        // sets up encoder/buttons pins + debounce baselines
   needsRedraw = true;

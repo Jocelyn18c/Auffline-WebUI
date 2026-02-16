@@ -9,7 +9,7 @@ inline void songUIprogress() {
   if (percentageSongComp < 0) percentageSongComp = 0;
   if (percentageSongComp > 1) percentageSongComp = 1;
 
-  tft.fillRoundRect(PADDING * 14, 185, (int)(170 * percentageSongComp), 5, 10, COLOR_ORANGE);
+  tft.fillRoundRect(PADDING * 14, 200, (int)(170 * percentageSongComp), 5, 10, COLOR_ORANGE);
 }
 
 inline void songTimeProgress() {
@@ -32,20 +32,29 @@ inline void songTimeProgress() {
   tft.printf("-%d:%02d", (int)remainingMinutes, (int)remainingSecs);
 }
 
+
+//main calling function
 inline void playingUI() {
   drawSmallHeader();
-
+  //main rect container
   tft.fillRoundRect(PADDING * 3, 45, 290, 180, 10, COLOR_HEADER_BG);
-  tft.fillRoundRect(PADDING * 6, 65, 100, 100, 10, COLOR_ORANGE);
-  tft.fillRoundRect(PADDING * 14, 185, 170, 5, 10, COLOR_GREY);
 
+  //song cover image placeholder
+  tft.fillRoundRect(PADDING * 6, 65, 100, 100, 10, COLOR_ORANGE);
+
+  //progress bar background
+  tft.fillRoundRect(PADDING * 14, 200, 170, 5, 10, COLOR_GREY);
+
+  //song name text
   tft.setTextColor(COLOR_BACKGROUND);
   tft.setTextSize(2);
   tft.setCursor(PADDING * 28, 70);
   tft.print(songName);
 
-  tft.setTextColor(COLOR_GREY);
-  tft.setTextSize(1);
+
+  //artist name text
+  tft.setTextColor(COLOR_BACKGROUND);
+  tft.setTextSize(1.5);
   tft.setCursor(PADDING * 28, 95);
   tft.print(songArtist);
 
