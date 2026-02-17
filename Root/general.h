@@ -57,11 +57,11 @@ inline void drawHeader() {
 inline void EQIcon(int x, int y) {
   tft.fillRoundRect(x, y,      4, 30, 10, COLOR_BACKGROUND);
   tft.fillRoundRect(x + 10, y, 4, 30, 10, COLOR_BACKGROUND);
-  tft.fillRoundRect(x + 20, y, 3.5, 30, 10, COLOR_BACKGROUND);
-  tft.fillRoundRect(x + 30, y, 3, 30, 10, COLOR_BACKGROUND);
+  tft.fillRoundRect(x + 20, y, 4, 30, 10, COLOR_BACKGROUND);
+  tft.fillRoundRect(x + 30, y, 4, 30, 10, COLOR_BACKGROUND);
 
-  tft.fillRoundRect(x - 3,      y + 5,  10, 5, 2, COLOR_ORANGE);
-  tft.fillRoundRect(x - 3 + 10, y + 10, 10, 5, 2, COLOR_ORANGE);
-  tft.fillRoundRect(x - 3 + 20, y + 15, 10, 5, 2, COLOR_ORANGE);
-  tft.fillRoundRect(x - 3 + 30, y + 7,  10, 5, 2, COLOR_ORANGE);
+  tft.fillRoundRect(x - 3,      y + 5,  10, 4, 2, COLOR_ORANGE);
+  tft.fillRoundRect(x - 3 + 10, y + 10, 10, 4, 2, COLOR_ORANGE);
+  tft.fillRoundRect(x - 3 + 20, y + 15, 10, 4, 2, COLOR_ORANGE);
+  tft.fillRoundRect(x - 3 + 30, y + 7,  10, 4, 2, COLOR_ORANGE);
 }
