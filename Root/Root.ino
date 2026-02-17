@@ -4,6 +4,7 @@
 #include <Adafruit_ILI9341.h>
 
 //test joy
+//ytr
 // ---- TFT pins (keep your wiring) ----
 #define TFT_CS   5
 #define TFT_DC   22
