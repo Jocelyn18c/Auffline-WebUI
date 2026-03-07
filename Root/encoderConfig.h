@@ -13,13 +13,16 @@ enum NavEvent : uint8_t {
 
 // ===== Pins =====
 constexpr uint8_t PIN_ENC_A  = 32;
-constexpr uint8_t PIN_ENC_B  = 33;
-constexpr uint8_t PIN_ENC_SW = 25;
+constexpr uint8_t PIN_ENC_B  = 25;
+constexpr uint8_t PIN_ENC_SW = 16;
 
 constexpr uint8_t PIN_BTN_UP    = 19;//
 constexpr uint8_t PIN_BTN_DOWN  = 4;//
 constexpr uint8_t PIN_BTN_BACK  = 16;
 constexpr uint8_t PIN_BTN_MODE  = 21; // optional -> you choose mapping
+
+// this controls the amount of ticks of the encoder to changein the UI menu.
+constexpr uint8_t TICKS_PER_DETENT = 2;
 
 // ===== Debounce =====
 struct ButtonDebounce {
@@ -57,15 +60,47 @@ static inline bool navFell(ButtonDebounce &b) {
 
 // ===== Internal State =====
 static ButtonDebounce btnEnc, btnUp, btnDown, btnBack, btnMode;
-static int lastEncA = HIGH;
-static uint32_t lastEncStepMs = 0;
-static const uint32_t ENC_STEP_GUARD_MS = 2; // small gate against bounce
+
+// Encoder state (interrupt-driven)
+volatile int32_t encTicks = 0;
+volatile uint8_t encPrev = 0;
+static int32_t encAccum = 0;
+
+// Gray code transition table for quadrature decoding
+static const int8_t ENC_TABLE[16] = {
+   0, -1, +1,  0,
+  +1,  0,  0, -1,
+  -1,  0,  0, +1,
+   0, +1, -1,  0
+};
+
+// ISR for encoder (both A and B trigger this)
+void IRAM_ATTR isrEncoderAB() {
+  uint8_t a = (uint8_t)digitalRead(PIN_ENC_A);
+  uint8_t b = (uint8_t)digitalRead(PIN_ENC_B);
+  uint8_t curr = (a << 1) | b;
+
+  uint8_t idx = (encPrev << 2) | curr;
+  encTicks += ENC_TABLE[idx];
+  encPrev = curr;
+}
 
 static inline void navBegin() {
+  // Encoder pins
   pinMode(PIN_ENC_A, INPUT_PULLUP);
   pinMode(PIN_ENC_B, INPUT_PULLUP);
   pinMode(PIN_ENC_SW, INPUT_PULLUP);
 
+  // Initialize encoder state
+  encPrev = ((uint8_t)digitalRead(PIN_ENC_A) << 1) | (uint8_t)digitalRead(PIN_ENC_B);
+  encTicks = 0;
+  encAccum = 0;
+
+  // Attach interrupts to both encoder pins for CHANGE
+  attachInterrupt(digitalPinToInterrupt(PIN_ENC_A), isrEncoderAB, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(PIN_ENC_B), isrEncoderAB, CHANGE);
+
+  // Button pins
   pinMode(PIN_BTN_UP, INPUT_PULLUP);
   pinMode(PIN_BTN_DOWN, INPUT_PULLUP);
   pinMode(PIN_BTN_BACK, INPUT_PULLUP);
@@ -76,23 +111,27 @@ static inline void navBegin() {
   navInitButton(btnDown, PIN_BTN_DOWN);
   navInitButton(btnBack, PIN_BTN_BACK);
   navInitButton(btnMode, PIN_BTN_MODE);
-
-  lastEncA = digitalRead(PIN_ENC_A);
-  lastEncStepMs = millis();
 }
 
 static inline NavEvent navPoll() {
-  // 1) Encoder rotation: rising edge on A
-  int A = digitalRead(PIN_ENC_A);
-  if (A != lastEncA) {
-    lastEncA = A;
-    if (A == HIGH) {
-      uint32_t now = millis();
-      if (now - lastEncStepMs >= ENC_STEP_GUARD_MS) {
-        lastEncStepMs = now;
-        int B = digitalRead(PIN_ENC_B);
-        return (B == LOW) ? NAV_RIGHT : NAV_LEFT;
-      }
+  // 1) Encoder rotation: accumulate ticks and emit events per detent
+  int32_t d;
+  noInterrupts();
+  d = encTicks;
+  encTicks = 0;
+  interrupts();
+
+  if (d != 0) {
+    encAccum += d;
+
+    // Apply exactly ONE step per detent threshold crossed
+    if (encAccum >= TICKS_PER_DETENT) {
+      encAccum -= TICKS_PER_DETENT;
+      return NAV_RIGHT;
+    }
+    if (encAccum <= -TICKS_PER_DETENT) {
+      encAccum += TICKS_PER_DETENT;
+      return NAV_LEFT;
     }
   }
 
