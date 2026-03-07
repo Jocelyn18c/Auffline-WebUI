@@ -6,9 +6,9 @@
 // ---- TFT pins (keep your wiring) ----
 #define TFT_CS   5
 #define TFT_DC   22
-#define TFT_RST  17
-#define TFT_SCK  18
-#define TFT_MOSI 23
+#define TFT_RST  21
+#define TFT_SCK  14
+#define TFT_MOSI 13
 
 Adafruit_ILI9341 tft(TFT_CS, TFT_DC, TFT_RST);
 
