@@ -26,7 +26,7 @@ int sd_library_scan() {
     if (!entry) break;
     if (!entry.isDirectory()) {
       String name = entry.name();
-      if (name.endsWith(".wav") || name.endsWith(".WAV")) {
+      if (name.endsWith(".wav") || name.endsWith(".WAV") || name.endsWith(".mp3") || name.endsWith(".MP3")) {
         strncpy(g_tracks[g_track_count].filename, entry.name(), 63);
         Serial.print("[SD] Found track: ");
         Serial.println(g_tracks[g_track_count].filename);
