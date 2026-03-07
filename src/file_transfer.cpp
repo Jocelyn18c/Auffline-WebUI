@@ -29,13 +29,14 @@ void file_transfer_init() {
     html += "<style>body{font-family:Arial;max-width:600px;margin:40px auto;padding:20px;}";
     html += "h1{color:#333;}li{padding:8px;border-bottom:1px solid #eee;}</style>";
     html += "</head><body>";
-    html += "<h1>🎵 Auffline Song Library</h1>";
+    html += "<h1> Auffline Song Library</h1>";
     html += "<form method='POST' action='/upload' enctype='multipart/form-data' style='margin:20px 0;'>";
-    html += "<input type='file' name='file' accept='.wav' style='margin-right:10px;'>";
+    html += "<input type='file' name='upload' accept='.wav,.mp3' style='margin-right:10px;'>";
     html += "<input type='submit' value='Upload Song' style='background:#333;color:white;border:none;padding:8px 16px;cursor:pointer;border-radius:4px;'>";
     html += "</form>";
     html += "<p>Connected to device. Your songs:</p><ul>";
 
+    sd_library_scan();
     int count = sd_library_get_count();
     for (int i = 0; i < count; i++) {
       const Track* t = sd_library_get_track(i);
@@ -55,19 +56,24 @@ void file_transfer_init() {
     request->redirect("/");
   });
 
+  static String uploadFilename = "";
+
   server.on("/upload", HTTP_POST, [](AsyncWebServerRequest *request){
-    request->send(200, "text/html", "<h2>Upload complete!</h2><a href='/'>Go back</a>");
-}, NULL, [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total){
-    static File uploadFile;
+    request->send(200, "text/html", "<h2>Upload complete!</h2><script>setTimeout(function(){ window.location='/'; }, 1500);</script>Redirecting...");
+}, [](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final){
     if(index == 0){
-        String filename = "/music/" + request->getParam("file", true, true)->value();
-        uploadFile = SD_MMC.open(filename, FILE_WRITE);
+        String path = "/music/" + filename;
+        Serial.print("[Upload] Saving to: ");
+        Serial.println(path);
+        SD_MMC.remove(path);
+        request->_tempFile = SD_MMC.open(path, FILE_WRITE);
     }
-    if(uploadFile){
-        uploadFile.write(data, len);
+    if(request->_tempFile){
+        request->_tempFile.write(data, len);
     }
-    if(index + len == total){
-        uploadFile.close();
+    if(final){
+        request->_tempFile.close();
+        Serial.println("[Upload] Done!");
         sd_library_scan();
     }
 });
