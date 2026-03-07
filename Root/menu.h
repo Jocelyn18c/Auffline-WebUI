@@ -13,18 +13,20 @@ inline const char* const menuItems[] = {
 inline const int menuCount = sizeof(menuItems) / sizeof(menuItems[0]);
 inline int lastMenuSelectedIndex = -1; // Track last selected for partial updates
 
-// Draw a single menu item
+// Draws and undraws menu items based on selection
 inline void drawMenuItem(int index, bool selected) {
   const int startY = HEADER_HEIGHT + 20;
   const int itemH  = 40;
   int y = startY + index * itemH;
 
   if (selected) {
+    //color the background of the selected item and draw the orange dot
     tft.fillRoundRect(20, y - 6, 280, 32, 10, COLOR_PANEL);
     tft.fillCircle(35, y + 8, 6, COLOR_ORANGE);
     tft.setTextColor(COLOR_TEXT);
   } else {
-    // Clear the selection background
+
+    // Clear the background of the unselected item and set text color to grey
     tft.fillRoundRect(20, y - 6, 280, 32, 10, COLOR_BG);
     tft.setTextColor(COLOR_GREY);
   }

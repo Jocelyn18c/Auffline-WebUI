@@ -17,7 +17,7 @@ constexpr uint8_t PIN_ENC_B  = 25;
 constexpr uint8_t PIN_ENC_SW = 16;
 
 constexpr uint8_t PIN_BTN_UP    = 19;//
-constexpr uint8_t PIN_BTN_DOWN  = 4;//
+constexpr uint8_t PIN_BTN_DOWN  = 4;    //
 constexpr uint8_t PIN_BTN_BACK  = 16;
 constexpr uint8_t PIN_BTN_MODE  = 21; // optional -> you choose mapping
 
