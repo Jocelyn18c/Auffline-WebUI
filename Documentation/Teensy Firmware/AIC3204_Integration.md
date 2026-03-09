@@ -43,8 +43,6 @@ Teensy <--> [I2C1, Wire1] <--> AIC3204 (addr 0x18)
 
 ## Hardware Constraints
 
-> PCB is manufactured and populated. No hardware modifications permitted.
-
 ### I2S Role
 - AIC3204 is **I2S slave** — Teensy drives MCLK2, BCLK2, and LRCLK2
 - Teensy must use `AudioOutputI2S2` and `AudioInputI2S2` (master variants)

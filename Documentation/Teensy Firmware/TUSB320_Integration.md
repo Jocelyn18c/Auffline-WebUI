@@ -48,8 +48,6 @@ Teensy <--> [I2C0, Wire] <--> TUSB320 (addr 0x60)
 
 ## Hardware Constraints
 
-> PCB is manufactured and populated. No hardware modifications permitted.
-
 ### Port Mode
 - PORT pin is pulled **LOW** → hardwired **UFP (Upstream Facing Port / Sink)** mode
 - The device permanently presents Rd (5.1kΩ) on both CC pins
