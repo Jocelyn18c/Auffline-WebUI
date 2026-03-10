@@ -25,7 +25,7 @@ Adafruit_ILI9341 tft(TFT_CS, TFT_DC, TFT_RST);
 
 // ---- Everything else is managed from here ----
 #include "screenManager.h"
-#include "splash.h"
+#include "SCREEN_splash.h"
 
 // =====================================================
 // Arduino Setup / Loop

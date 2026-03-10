@@ -37,15 +37,15 @@ inline void navigateTo(Screen s) {
 // Each header owns: its state, its draw functions,
 // and its handleXxxNav(NavEvent) function.
 // =====================================================
-#include "menu.h"
-#include "songlist.h"
-#include "nowplaying.h"
-#include "bluetooth.h"
-#include "wifi.h"
-#include "display_settings.h"
-#include "audio_settings.h"
-#include "about.h"
-#include "settings.h"
+#include "SCREEN_menu.h"
+#include "SCREEN_songlist.h"
+#include "SCREEN_nowplaying.h"
+#include "SCREEN_bluetooth.h"
+#include "SCREEN_wifi.h"
+#include "SCREEN_display_settings.h"
+#include "SCREEN_audio_settings.h"
+#include "SCREEN_about.h"
+#include "SCREEN_settings.h"
 
 // =====================================================
 // Draw Router
