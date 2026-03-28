@@ -8,7 +8,8 @@ enum NavEvent : uint8_t {
   NAV_UP,
   NAV_DOWN,
   NAV_SELECT,
-  NAV_BACK
+  NAV_BACK,
+  NAV_MODE
 };
 
 // ===== Pins =====
@@ -16,10 +17,10 @@ constexpr uint8_t PIN_ENC_A  = 25;
 constexpr uint8_t PIN_ENC_B  = 32;
 constexpr uint8_t PIN_ENC_SW = 16;
 
-constexpr uint8_t PIN_BTN_UP    = 19;//
-constexpr uint8_t PIN_BTN_DOWN  = 4;    //
-constexpr uint8_t PIN_BTN_BACK  = 17;
-constexpr uint8_t PIN_BTN_MODE  = 21; // optional -> you choose mapping
+constexpr uint8_t PIN_BTN_UP    = 2;
+constexpr uint8_t PIN_BTN_DOWN  = 3;
+constexpr uint8_t PIN_BTN_BACK  = 4;
+constexpr uint8_t PIN_BTN_MODE  = 5;
 
 // this controls the amount of ticks of the encoder to changein the UI menu.
 constexpr uint8_t TICKS_PER_DETENT = 2;
@@ -75,7 +76,7 @@ static const int8_t ENC_TABLE[16] = {
 };
 
 // ISR for encoder (both A and B trigger this)
-void IRAM_ATTR isrEncoderAB() {
+void FASTRUN isrEncoderAB() {
   uint8_t a = (uint8_t)digitalRead(PIN_ENC_A);
   uint8_t b = (uint8_t)digitalRead(PIN_ENC_B);
   uint8_t curr = (a << 1) | b;
@@ -167,7 +168,23 @@ static inline NavEvent navPoll() {
   if (navFell(btnBack)) return NAV_BACK;
 
   // 4) Optional button mapping
-  if (navFell(btnMode)) return NAV_SELECT;
+  // 4) Mode button — single click = SELECT, double click = MODE
+static uint32_t modeLastPressMs   = 0;
+static bool     modePendingSelect = false;
+
+if (navFell(btnMode)) {
+  if (modePendingSelect && (millis() - modeLastPressMs) <= 350) {
+    modePendingSelect = false;
+    return NAV_MODE;
+  } else {
+    modePendingSelect = true;
+    modeLastPressMs   = millis();
+  }
+}
+if (modePendingSelect && (millis() - modeLastPressMs) > 350) {
+  modePendingSelect = false;
+  return NAV_SELECT;
+}
 
   return NAV_NONE;
 }

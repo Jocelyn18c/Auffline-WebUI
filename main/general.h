@@ -2,8 +2,8 @@
 #include <stdint.h> 
 
 // Forward-declare so this header can use `tft` without including the whole driver.
-class Adafruit_ILI9341;
-extern Adafruit_ILI9341 tft;
+#include <ILI9341_t3.h>
+extern ILI9341_t3 tft;
 
 // ===== Standard 16-bit RGB565 Colors =====
 #define COLOR_BACKGROUND  0x2945

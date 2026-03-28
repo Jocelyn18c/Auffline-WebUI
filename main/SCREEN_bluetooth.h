@@ -1,4 +1,4 @@
-#pragma once
+/*#pragma once
 #include "general.h"
 #include "bt_a2dp.h"
 
@@ -369,4 +369,25 @@ inline void handleBluetoothNav(NavEvent e) {
     }
     updateBluetoothSelection();
   }
+}
+*/
+
+#pragma once
+#include "general.h"
+
+inline void drawBluetoothScreen() {
+  tft.fillScreen(COLOR_BG);
+  drawSmallHeader();
+  tft.setTextColor(COLOR_TEXT);
+  tft.setTextSize(2);
+  tft.setCursor(80, 120);
+  tft.print("Bluetooth");
+  tft.setTextSize(1);
+  tft.setTextColor(COLOR_GREY);
+  tft.setCursor(60, 150);
+  tft.print("Handled by ESP32");
+}
+
+inline void handleBluetoothNav(NavEvent e) {
+  if (e == NAV_BACK) navigateTo(SCREEN_SETTINGS);
 }

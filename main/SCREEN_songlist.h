@@ -6,11 +6,11 @@
 // =====================================================
 // SD Card Pins (separate SPI bus from TFT)
 // =====================================================
-#define SD_MISO  19
+/*#define SD_MISO  19
 #define SD_MOSI  23
 #define SD_SCK   18
 #define SD_CS    17
-
+*/
 // =====================================================
 // Song Data Structure
 // =====================================================
@@ -36,14 +36,19 @@ inline int lastSongListScrollOffset  = -1;
 // =====================================================
 
 // Returns true if name ends with .mp3 (case-insensitive)
-inline bool isMp3(const char* name) {
+inline bool isAudioFile(const char* name) {
   int len = strlen(name);
   if (len < 4) return false;
   const char* ext = name + len - 4;
-  return (ext[0] == '.' &&
-          (ext[1] == 'm' || ext[1] == 'M') &&
-          (ext[2] == 'p' || ext[2] == 'P') &&
-          (ext[3] == '3'));
+  if (ext[0] == '.' &&
+      (ext[1] == 'w' || ext[1] == 'W') &&
+      (ext[2] == 'a' || ext[2] == 'A') &&
+      (ext[3] == 'v' || ext[3] == 'V')) return true;
+  if (ext[0] == '.' &&
+      (ext[1] == 'm' || ext[1] == 'M') &&
+      (ext[2] == 'p' || ext[2] == 'P') &&
+      (ext[3] == '3')) return true;
+  return false;
 }
 
 // Copies filename stem (strips leading '/' and '.mp3') into dst[maxLen]
@@ -69,18 +74,15 @@ inline void loadSongsFromSD() {
   songListSelectedIndex = 0;
   songListScrollOffset  = 0;
 
-  static SPIClass sdSPI(HSPI);
-  static bool     sdSpiBegun = false;
+  //static SPIClass sdSPI(HSPI);
+  //static bool     sdSpiBegun = false;
 
-  if (!sdSpiBegun) {
-    sdSPI.begin(SD_SCK, SD_MISO, SD_MOSI, SD_CS);
-    sdSpiBegun = true;
-  }
+  if (!SD.begin(BUILTIN_SDCARD)) return;
 
   // Re-attempt SD.begin() each call so hotplug works
-  if (!SD.begin(SD_CS, sdSPI)) return;  // SD absent or failed — songCount stays 0
+ // if (!SD.begin(SD_CS, sdSPI)) return;  // SD absent or failed — songCount stays 0
 
-  File root = SD.open("/");
+  File root = SD.open("/music");
   if (!root) return;
 
   while (songCount < 50) {
@@ -104,7 +106,7 @@ inline void loadSongsFromSD() {
     }
 
     // Only .mp3 files
-    if (!isMp3(name)) {
+    if (!isAudioFile(name)) {
       entry.close();
       continue;
     }
@@ -253,8 +255,176 @@ inline void drawSongListScreen() {
 }
 
 // =====================================================
+// Add to Playlist Feature
+// =====================================================
+#define MAX_PRESET_NAMES 8
+inline const char* const presetPlaylistNames[] = {
+  "Favorites",
+  "Workout", 
+  "Chill",
+  "Party",
+  "Road Trip",
+  "Late Night",
+  "Throwbacks",
+  "Hype"
+};
+
+inline bool addToPlaylistMode     = false;
+inline int  addToPlaylistSelected = 0;
+inline int  addToPlaylistScroll   = 0;
+#define ADD_PLAYLIST_PER_PAGE 5
+
+inline void drawAddToPlaylistScreen(int songIndex) {
+  tft.fillScreen(COLOR_BG);
+  drawSmallHeader();
+
+  tft.setTextColor(COLOR_TEXT);
+  tft.setTextSize(2);
+  tft.setCursor(PADDING * 3, SMALL_HEADER_HEIGHT + 8);
+  tft.print("Add to Playlist");
+
+  tft.setTextSize(1);
+  tft.setTextColor(COLOR_GREY);
+  tft.setCursor(PADDING * 3, SMALL_HEADER_HEIGHT + 28);
+  char truncated[24];
+  strncpy(truncated, songList[songIndex].title, 23);
+  truncated[23] = '\0';
+  tft.print(truncated);
+
+  const int startY = SMALL_HEADER_HEIGHT + 50;
+  const int itemH  = 35;
+
+  for (int i = 0; i < ADD_PLAYLIST_PER_PAGE; i++) {
+    int idx = addToPlaylistScroll + i;
+    if (idx >= MAX_PRESET_NAMES) break;
+
+    int y = startY + i * itemH;
+    bool selected = (idx == addToPlaylistSelected);
+
+    if (selected) {
+      tft.fillRoundRect(PADDING * 2, y - 3, 300, itemH - 5, 8, COLOR_PANEL);
+      tft.fillCircle(PADDING * 3 + 5, y + 10, 4, COLOR_ORANGE);
+      tft.setTextColor(COLOR_TEXT);
+    } else {
+      tft.fillRoundRect(PADDING * 2, y - 3, 300, itemH - 5, 8, COLOR_BG);
+      tft.setTextColor(COLOR_GREY);
+    }
+
+    tft.setTextSize(2);
+    tft.setCursor(PADDING * 5, y);
+    tft.print(presetPlaylistNames[idx]);
+  }
+}
+
+inline void addSongToPlaylist(int songIndex, const char* playlistName) {
+  char path[64];
+  snprintf(path, sizeof(path), "/playlists/%s.txt", playlistName);
+
+  if (!SD.exists("/playlists")) {
+    SD.mkdir("/playlists");
+  }
+
+  File f = SD.open(path, FILE_WRITE);
+  if (f) {
+    char songPath[72];
+    snprintf(songPath, sizeof(songPath), "/music/%s", songList[songIndex].filename);
+    f.println(songPath);
+    f.close();
+    Serial.print("[Playlist] Added ");
+    Serial.print(songPath);
+    Serial.print(" to ");
+    Serial.println(path);
+  }
+}
+
+inline void handleAddToPlaylistNav(NavEvent e) {
+  if (e == NAV_UP || e == NAV_LEFT) {
+    if (addToPlaylistSelected <= 0) return;
+    addToPlaylistSelected--;
+    if (addToPlaylistSelected < addToPlaylistScroll)
+      addToPlaylistScroll = addToPlaylistSelected;
+    drawAddToPlaylistScreen(songListSelectedIndex);
+  }
+  else if (e == NAV_DOWN || e == NAV_RIGHT) {
+    if (addToPlaylistSelected >= MAX_PRESET_NAMES - 1) return;
+    addToPlaylistSelected++;
+    if (addToPlaylistSelected >= addToPlaylistScroll + ADD_PLAYLIST_PER_PAGE)
+      addToPlaylistScroll = addToPlaylistSelected - ADD_PLAYLIST_PER_PAGE + 1;
+    drawAddToPlaylistScreen(songListSelectedIndex);
+  }
+  else if (e == NAV_SELECT) {
+    addSongToPlaylist(songListSelectedIndex, presetPlaylistNames[addToPlaylistSelected]);
+    tft.fillScreen(COLOR_BG);
+    tft.setTextColor(COLOR_ORANGE);
+    tft.setTextSize(2);
+    tft.setCursor(50, 100);
+    tft.print("Added to:");
+    tft.setTextColor(COLOR_TEXT);
+    tft.setCursor(50, 130);
+    tft.print(presetPlaylistNames[addToPlaylistSelected]);
+    delay(1000);
+    addToPlaylistMode     = false;
+    addToPlaylistSelected = 0;
+    addToPlaylistScroll   = 0;
+    needsRedraw = true;
+  }
+  else if (e == NAV_BACK) {
+    addToPlaylistMode     = false;
+    addToPlaylistSelected = 0;
+    addToPlaylistScroll   = 0;
+    needsRedraw = true;
+  }
+}
+
+
+// =====================================================
 // Navigation Handler
 // =====================================================
+inline void saveToRecents(const char* filename) {
+  // Read existing recents
+  char lines[20][72];
+  int count = 0;
+
+  File f = SD.open("/recents.txt", FILE_READ);
+  if (f) {
+    while (f.available() && count < 19) {
+      String line = f.readStringUntil('\n');
+      line.trim();
+      if (line.length() > 0) {
+        strncpy(lines[count], line.c_str(), 71);
+        lines[count][71] = '\0';
+        count++;
+      }
+    }
+    f.close();
+  }
+
+  // Build new song path
+  char newPath[72];
+  snprintf(newPath, sizeof(newPath), "/music/%s", filename);
+
+  // Remove duplicate if exists
+  int newCount = 0;
+  char filtered[20][72];
+  for (int i = 0; i < count; i++) {
+    if (strcmp(lines[i], newPath) != 0) {
+      strncpy(filtered[newCount], lines[i], 71);
+      filtered[newCount][71] = '\0';
+      newCount++;
+    }
+  }
+
+  // Write new song first, then rest (max 20)
+  File out = SD.open("/recents.txt", O_WRITE | O_CREAT | O_TRUNC);
+  if (out) {
+    out.println(newPath);
+    for (int i = 0; i < min(newCount, 19); i++) {
+      out.println(filtered[i]);
+    }
+    out.close();
+  }
+}
+
 inline void selectCurrentSong() {
   Song* selected = getCurrentSong();
   if (!selected) return;
@@ -263,10 +433,28 @@ inline void selectCurrentSong() {
   songArtist = selected->artist;
 
   songProgressedSeconds = 0;
-  songTotalSeconds      = 180; // TODO: read actual duration from MP3 metadata
+  songTotalSeconds      = 180;
+
+  // Save to recents
+  saveToRecents(selected->filename);
 }
 
 inline void handleSongListNav(NavEvent e) {
+  // NEW: If in add-to-playlist mode, delegate to that handler
+  if (addToPlaylistMode) {
+    handleAddToPlaylistNav(e);
+    return;
+  }
+
+  // NEW: MODE button = trigger add to playlist
+  if (e == NAV_MODE && songCount > 0) {
+    addToPlaylistMode     = true;
+    addToPlaylistSelected = 0;
+    addToPlaylistScroll   = 0;
+    drawAddToPlaylistScreen(songListSelectedIndex);
+    return;
+  }
+
   if (e == NAV_UP || e == NAV_LEFT) {
     songListSelectedIndex--;
     if (songListSelectedIndex < 0) {

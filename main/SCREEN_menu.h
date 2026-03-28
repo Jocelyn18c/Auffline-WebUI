@@ -160,12 +160,15 @@ inline void handleMenuNav(NavEvent e) {
         break;
 
       case 1: // Albums    — TODO
+        navigateTo(SCREEN_ALBUMS);
         break;
 
       case 2: // Playlists — TODO
+        navigateTo(SCREEN_PLAYLIST);
         break;
 
       case 3: // Recent    — TODO
+        navigateTo(SCREEN_RECENTS);
         break;
 
       case 4: // Settings

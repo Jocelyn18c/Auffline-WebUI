@@ -1,4 +1,4 @@
-//contains actual logics
+/*//contains actual logics
 #include "bt_a2dp.h"
 
 static bool s_has_connected_bda = false;
@@ -369,5 +369,9 @@ void bt_disconnect() {
   Serial.println("[A2DP] disconnect()");
   a2dp.disconnect();
 }
+*/
 
-
+#pragma once
+// Bluetooth stubbed out for Teensy build
+// BM83 bluetooth handled by ESP32 separately
+inline void btLiveRefresh() {}

@@ -14,7 +14,10 @@ enum Screen : uint8_t {
   SCREEN_WIFI,
   SCREEN_DISPLAY,
   SCREEN_AUDIO,
-  SCREEN_ABOUT
+  SCREEN_ABOUT,
+  SCREEN_PLAYLIST,
+  SCREEN_RECENTS,
+  SCREEN_ALBUMS
 };
 
 // =====================================================
@@ -46,6 +49,9 @@ inline void navigateTo(Screen s) {
 #include "SCREEN_audio_settings.h"
 #include "SCREEN_about.h"
 #include "SCREEN_settings.h"
+#include "SCREEN_playlist.h"
+#include "SCREEN_recents.h"
+#include "SCREEN_albums.h"
 
 // =====================================================
 // Draw Router
@@ -62,6 +68,9 @@ inline void drawCurrentScreen() {
     case SCREEN_DISPLAY:    drawDisplayScreen();               break;
     case SCREEN_AUDIO:      drawAudioScreen();                 break;
     case SCREEN_ABOUT:      drawAboutScreen();                 break;
+    case SCREEN_PLAYLIST:   drawPlaylistScreen();              break;
+    case SCREEN_RECENTS: drawRecentsScreen();                  break;
+    case SCREEN_ALBUMS: drawAlbumScreen();                     break;
   }
 }
 
@@ -81,5 +90,8 @@ inline void handleNavEvent(NavEvent e) {
     case SCREEN_DISPLAY:    handleDisplayNav(e);    break;
     case SCREEN_AUDIO:      handleAudioNav(e);      break;
     case SCREEN_ABOUT:      handleAboutNav(e);      break;
+    case SCREEN_PLAYLIST:   handlePlaylistNav(e);   break;
+    case SCREEN_RECENTS:    handleRecentsNav(e);    break;
+    case SCREEN_ALBUMS:     handleAlbumNav(e);      break;
   }
 }
