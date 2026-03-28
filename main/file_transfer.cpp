@@ -4,7 +4,7 @@
 
 // =====================================================
 // File Transfer — Teensy 4.1 USB MTP
-// Works on both Mac nd Windows
+// Works on Windows
 // =====================================================
 
 void file_transfer_init() {
